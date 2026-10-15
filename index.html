@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitcoin Balance Checker | ビットコイン残高チェッカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --btc-orange: #f7931a;
+      --btc-dark:   #1a1a2e;
+      --btc-mid:    #16213e;
+      --btc-panel:  #0f3460;
+      --btc-accent: #e94560;
+      --text-main:  #e8eaf0;
+      --text-muted: #8892a4;
+      --green:      #00d26a;
+      --red:        #ff5252;
+      --border:     rgba(247,147,26,.25);
+      --card-bg:    rgba(15,52,96,.45);
+      --radius:     12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--btc-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(247,147,26,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(233,69,96,.06) 0%, transparent 60%);
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: rgba(22,33,62,.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: var(--btc-orange);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 700; color: #fff;
+      box-shadow: 0 0 18px rgba(247,147,26,.5);
+    }
+    .logo-text h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .3px; }
+    .logo-text p  { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* lang toggle */
+    .lang-toggle {
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    .lang-btn.active {
+      background: var(--btc-orange);
+      border-color: var(--btc-orange);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(247,147,26,.4);
+    }
+    .lang-btn:hover:not(.active) { border-color: var(--btc-orange); color: var(--btc-orange); }
+
+    /* ── MAIN LAYOUT ── */
+    main { max-width: 900px; margin: 0 auto; padding: 32px 16px 60px; }
+
+    /* ── INPUT SECTION ── */
+    .input-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(8px);
+    }
+    .input-section label {
+      display: block;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--btc-orange);
+      margin-bottom: 10px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      background: rgba(10,10,30,.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-family: 'Courier New', monospace;
+      font-size: .85rem;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color .2s;
+      outline: none;
+    }
+    textarea:focus { border-color: var(--btc-orange); box-shadow: 0 0 0 3px rgba(247,147,26,.15); }
+    textarea::placeholder { color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: .83rem; }
+
+    .input-hint {
+      font-size: .77rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* buttons */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--btc-orange);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(247,147,26,.35);
+    }
+    .btn-primary:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(247,147,26,.5); }
+    .btn-primary:active { transform: none; }
+    .btn-secondary {
+      background: rgba(255,255,255,.07);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.13); color: var(--text-main); }
+
+    /* ── AUTO-REFRESH BAR ── */
+    .refresh-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .refresh-info { font-size: .84rem; color: var(--text-muted); }
+    .refresh-info strong { color: var(--text-main); }
+    .refresh-info .countdown { color: var(--btc-orange); font-weight: 700; font-size: 1rem; }
+
+    .progress-ring-wrap { display: flex; align-items: center; gap: 10px; }
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring circle { transition: stroke-dashoffset .9s linear; }
+
+    .last-updated { font-size: .77rem; color: var(--text-muted); }
+
+    /* ── RESULTS ── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .results-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+
+    /* summary strip */
+    .summary-strip {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .summary-card {
+      flex: 1;
+      min-width: 120px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      text-align: center;
+    }
+    .summary-card .s-label { font-size: .74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+    .summary-card .s-value { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+    .summary-card .s-value.orange { color: var(--btc-orange); }
+    .summary-card .s-value.green  { color: var(--green); }
+
+    /* address cards */
+    .address-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .address-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 16px;
+      align-items: center;
+      transition: border-color .2s, transform .15s;
+      backdrop-filter: blur(6px);
+    }
+    .address-card:hover { border-color: rgba(247,147,26,.5); transform: translateX(2px); }
+    .address-card.loading { opacity: .6; }
+    .address-card.error   { border-color: rgba(255,82,82,.4); }
+
+    .addr-label {
+      font-size: .7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 2px;
+    }
+    .addr-hash {
+      font-family: 'Courier New', monospace;
+      font-size: .82rem;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+    .addr-hash a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dotted var(--text-muted);
+      transition: color .2s;
+    }
+    .addr-hash a:hover { color: var(--btc-orange); border-color: var(--btc-orange); }
+
+    .balance-block { text-align: right; white-space: nowrap; }
+    .balance-btc {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--btc-orange);
+    }
+    .balance-usd {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .balance-usd span { color: var(--green); }
+
+    .addr-meta {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: .74rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .addr-meta span strong { color: var(--text-main); }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .status-dot.ok    { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-dot.err   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+    .status-dot.spin  {
+      background: var(--btc-orange);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* error text */
+    .err-text { color: var(--red); font-size: .8rem; }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 14px; }
+    .empty-state p { font-size: .9rem; line-height: 1.7; }
+
+    /* spinner overlay for initial load */
+    .spinner-inline {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--btc-orange);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* responsive */
+    @media (max-width: 560px) {
+      .address-card { grid-template-columns: 1fr; }
+      .balance-block { text-align: left; }
+      header { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">₿</div>
+    <div class="logo-text">
+      <h1 data-en="Bitcoin Balance Checker" data-ja="ビットコイン残高チェッカー">Bitcoin Balance Checker</h1>
+      <p data-en="Real-time balance lookup for up to 10 addresses"
+         data-ja="最大10アドレスのリアルタイム残高照会">Real-time balance lookup for up to 10 addresses</p>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn"        id="btn-ja" onclick="setLang('ja')">日本語</button>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- INPUT -->
+  <section class="input-section">
+    <label data-en="BITCOIN ADDRESSES (one per line, max 10)"
+           data-ja="ビットコインアドレス（1行1件、最大10件）">BITCOIN ADDRESSES (one per line, max 10)</label>
+    <textarea id="addr-input"
+      data-en-placeholder="Enter Bitcoin addresses here, one per line…&#10;Example:&#10;1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf Na&#10;3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"
+      data-ja-placeholder="ビットコインアドレスを1行1件で入力してください…&#10;例：&#10;1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa&#10;3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"
+      placeholder="Enter Bitcoin addresses here, one per line…"></textarea>
+    <p class="input-hint" data-en="Supports Legacy (1...), SegWit (3...), and Bech32 (bc1...) address formats."
+                          data-ja="レガシー（1...）、SegWit（3...）、Bech32（bc1...）形式に対応しています。">
+      Supports Legacy (1...), SegWit (3...), and Bech32 (bc1...) address formats.
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="fetchAll()">
+        <span>🔍</span>
+        <span data-en="Check Balances" data-ja="残高を確認">Check Balances</span>
+      </button>
+      <button class="btn btn-secondary" onclick="clearAll()">
+        <span data-en="Clear" data-ja="クリア">Clear</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- AUTO-REFRESH BAR (hidden until first fetch) -->
+  <div class="refresh-bar" id="refresh-bar" style="display:none">
+    <div class="refresh-info">
+      <span data-en="Auto-refresh in" data-ja="次回更新まで">Auto-refresh in</span>
+      <span class="countdown" id="countdown">60</span>s
+      <span class="last-updated" id="last-updated"></span>
+    </div>
+    <div class="progress-ring-wrap">
+      <svg class="progress-ring" width="36" height="36">
+        <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="3"/>
+        <circle id="ring-fill" cx="18" cy="18" r="14" fill="none"
+          stroke="#f7931a" stroke-width="3"
+          stroke-dasharray="87.96" stroke-dashoffset="0"
+          stroke-linecap="round"/>
+      </svg>
+      <button class="btn btn-secondary" style="padding:6px 14px;font-size:.8rem" onclick="fetchAll()">
+        <span data-en="↺ Refresh Now" data-ja="↺ 今すぐ更新">↺ Refresh Now</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SUMMARY + RESULTS -->
+  <div id="results-area"></div>
+
+</main>
+
+<script>
+/* ─────────────────────────────────────────────
+   LANGUAGE
+───────────────────────────────────────────── */
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
+
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+
+  // textarea placeholder
+  const ta = document.getElementById('addr-input');
+  ta.placeholder = ta.getAttribute('data-' + lang + '-placeholder');
+
+  // re-render results if any
+  if (lastResults.length) renderResults(lastResults);
+}
+
+/* ─────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────── */
+let lastResults = [];
+let timerInterval = null;
+let countdown = 60;
+const INTERVAL = 60; // seconds
+const CIRCUMFERENCE = 2 * Math.PI * 14; // 87.96
+
+/* ─────────────────────────────────────────────
+   FETCH
+───────────────────────────────────────────── */
+async function fetchAll() {
+  const raw = document.getElementById('addr-input').value;
+  const addresses = raw.split('\n')
+    .map(a => a.trim())
+    .filter(a => a.length > 0)
+    .slice(0, 10);
+
+  if (addresses.length === 0) {
+    alert(currentLang === 'en'
+      ? 'Please enter at least one Bitcoin address.'
+      : '少なくとも1つのビットコインアドレスを入力してください。');
+    return;
+  }
+
+  // Show refresh bar
+  document.getElementById('refresh-bar').style.display = 'flex';
+
+  // Show loading cards
+  lastResults = addresses.map(a => ({ address: a, status: 'loading' }));
+  renderResults(lastResults);
+
+  // Fetch BTC price + balances in parallel
+  const [price, ...balances] = await Promise.all([
+    fetchBtcPrice(),
+    ...addresses.map(a => fetchAddress(a))
+  ]);
+
+  lastResults = balances.map(b => ({ ...b, price }));
+  renderResults(lastResults);
+
+  // Reset timer
+  resetTimer();
+  updateLastUpdated();
+}
+
+async function fetchBtcPrice() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+    const d = await r.json();
+    return d.bitcoin.usd;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAddress(address) {
+  try {
+    // blockstream.info is CORS-friendly and reliable
+    const r = await fetch(`https://blockstream.info/api/address/${address}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+
+    const funded  = d.chain_stats.funded_txo_sum   + d.mempool_stats.funded_txo_sum;
+    const spent   = d.chain_stats.spent_txo_sum    + d.mempool_stats.spent_txo_sum;
+    const balance = funded - spent; // satoshis
+
+    const txCount = d.chain_stats.tx_count + d.mempool_stats.tx_count;
+    const unconfirmed = d.mempool_stats.tx_count;
+
+    return {
+      address,
+      status: 'ok',
+      balanceSat: balance,
+      balanceBtc: balance / 1e8,
+      txCount,
+      unconfirmed
+    };
+  } catch (e) {
+    return { address, status: 'error', message: e.message };
+  }
+}
+
+/* ─────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────── */
+const t = {
+  addressLabel: { en: 'ADDRESS', ja: 'アドレス' },
+  balance:      { en: 'Balance',  ja: '残高' },
+  transactions: { en: 'Transactions', ja: 'トランザクション数' },
+  unconfirmed:  { en: 'Unconfirmed (mempool)', ja: '未承認（メモリプール）' },
+  totalBalance: { en: 'Total Balance', ja: '合計残高' },
+  addresses:    { en: 'Addresses', ja: 'アドレス数' },
+  btcPrice:     { en: 'BTC Price', ja: 'BTC価格' },
+  error:        { en: 'Error', ja: 'エラー' },
+  loading:      { en: 'Loading…', ja: '読み込み中…' },
+  viewExplorer: { en: 'View on Explorer', ja: 'エクスプローラーで確認' },
+  noData:       { en: 'No addresses loaded yet.', ja: 'アドレスがまだ読み込まれていません。' },
+  errorFetch:   { en: 'Failed to fetch data', ja: 'データの取得に失敗しました' },
+};
+const tx = k => t[k][currentLang];
+
+function fmt(n) {
+  return n.toLocaleString(currentLang === 'ja' ? 'ja-JP' : 'en-US', { maximumFractionDigits: 8 });
+}
+function fmtUsd(n) {
+  return n.toLocaleString(currentLang === 'ja' ? 'ja-JP' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+}
+
+function renderResults(results) {
+  const area = document.getElementById('results-area');
+  if (!results.length) {
+    area.innerHTML = `<div class="empty-state"><div class="icon">₿</div><p>${tx('noData')}</p></div>`;
+    return;
+  }
+
+  const okResults = results.filter(r => r.status === 'ok');
+  const totalBtc  = okResults.reduce((s, r) => s + r.balanceBtc, 0);
+  const price     = results.find(r => r.price)?.price ?? null;
+  const totalUsd  = price ? totalBtc * price : null;
+
+  // Summary strip
+  const summaryHTML = `
+    <div class="summary-strip">
+      <div class="summary-card">
+        <div class="s-label">${tx('totalBalance')}</div>
+        <div class="s-value orange">${fmt(totalBtc)} <small style="font-size:.7em">BTC</small></div>
+        ${totalUsd != null ? `<div style="font-size:.78rem;color:var(--green);margin-top:4px">≈ ${fmtUsd(totalUsd)}</div>` : ''}
+      </div>
+      <div class="summary-card">
+        <div class="s-label">${tx('addresses')}</div>
+        <div class="s-value orange">${results.length}</div>
+      </div>
+      ${price != null ? `
+      <div class="summary-card">
+        <div class="s-label">${tx('btcPrice')}</div>
+        <div class="s-value green">${fmtUsd(price)}</div>
+      </div>` : ''}
+    </div>`;
+
+  // Address cards
+  const cardsHTML = results.map(r => {
+    if (r.status === 'loading') {
+      return `<div class="address-card loading">
+        <div>
+          <div class="addr-label">${tx('addressLabel')}</div>
+          <div class="addr-hash">${r.address}</div>
+        </div>
+        <div class="balance-block">
+          <div class="spinner-inline"></div>
+        </div>
+      </div>`;
+    }
+    if (r.status === 'error') {
+      return `<div class="address-card error">
+        <div>
+          <div class="addr-label">${tx('addressLabel')}</div>
+          <div class="addr-hash">${r.address}</div>
+        </div>
+        <div class="balance-block">
+          <span class="status-dot err"></span>
+          <span class="err-text">${tx('errorFetch')}</span>
+        </div>
+        <div class="addr-meta"><span>${r.message || ''}</span></div>
+      </div>`;
+    }
+    const usd = (r.price && r.balanceBtc) ? fmtUsd(r.balanceBtc * r.price) : null;
+    return `<div class="address-card">
+      <div>
+        <div class="addr-label">${tx('addressLabel')}</div>
+        <div class="addr-hash">
+          <a href="https://blockstream.info/address/${r.address}" target="_blank" rel="noopener">${r.address}</a>
+        </div>
+      </div>
+      <div class="balance-block">
+        <div class="balance-btc"><span class="status-dot ok"></span>${fmt(r.balanceBtc)} BTC</div>
+        ${usd ? `<div class="balance-usd">≈ <span>${usd}</span></div>` : ''}
+      </div>
+      <div class="addr-meta">
+        <span><strong>${r.txCount.toLocaleString()}</strong> ${tx('transactions')}</span>
+        ${r.unconfirmed > 0 ? `<span style="color:var(--btc-orange)"><strong>${r.unconfirmed}</strong> ${tx('unconfirmed')}</span>` : ''}
+        <span style="margin-left:auto">
+          <a href="https://blockstream.info/address/${r.address}" target="_blank" rel="noopener"
+             style="color:var(--text-muted);text-decoration:none;font-size:.73rem;border-bottom:1px dotted var(--text-muted)">
+            ${tx('viewExplorer')} ↗
+          </a>
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+
+  area.innerHTML = summaryHTML + `<div class="address-list">${cardsHTML}</div>`;
+}
+
+/* ─────────────────────────────────────────────
+   TIMER
+───────────────────────────────────────────── */
+function resetTimer() {
+  countdown = INTERVAL;
+  if (timerInterval) clearInterval(timerInterval);
+  updateRing();
+  timerInterval = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown;
+    updateRing();
+    if (countdown <= 0) {
+      fetchAll();
+    }
+  }, 1000);
+}
+
+function updateRing() {
+  const pct = countdown / INTERVAL;
+  const offset = CIRCUMFERENCE * (1 - pct);
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+  document.getElementById('countdown').textContent = countdown;
+}
+
+function updateLastUpdated() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString(currentLang === 'ja' ? 'ja-JP' : 'en-US');
+  const msg = currentLang === 'ja'
+    ? `　最終更新: ${timeStr}`
+    : `　Last updated: ${timeStr}`;
+  document.getElementById('last-updated').textContent = msg;
+}
+
+/* ─────────────────────────────────────────────
+   CLEAR
+───────────────────────────────────────────── */
+function clearAll() {
+  document.getElementById('addr-input').value = '';
+  document.getElementById('results-area').innerHTML = '';
+  document.getElementById('refresh-bar').style.display = 'none';
+  lastResults = [];
+  if (timerInterval) clearInterval(timerInterval);
+}
+
+/* ─────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────── */
+setLang('en');
+</script>
+</body>
+</html>
