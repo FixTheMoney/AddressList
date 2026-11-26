@@ -2,6 +2,13 @@
 
 A bilingual (English / Japanese) static web page that looks up Bitcoin address balances in real time and auto-refreshes every 60 seconds.
 
+## Layout
+
+- Desktop: input panel on the left, **one single results container (table)** on the right, so all 10 addresses fit on one screen.
+- Mobile: panels stack; the Txs column is hidden to save width.
+- Files: `index.html` (markup + CSS), `app.js` (logic, i18n, rendering).
+- Optional URL params: `?addr=addr1,addr2,...` pre-fills and loads; `?lang=ja` starts in Japanese.
+
 ## Features
 
 - Enter up to **10 Bitcoin addresses** (one per line)
